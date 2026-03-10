@@ -14,7 +14,7 @@ function Footer() {
       <div className="footer-links">
         <Link to="/uv-index">Check UV</Link>
         <Link to="/protection-planner">Plan protection</Link>
-        <Link to="/about">About the project</Link>
+        {/* <Link to="/about">About the project</Link> */}
       </div>
     </footer>
   )

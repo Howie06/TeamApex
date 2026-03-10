@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import PageLayout from '../layouts/PageLayout'
-import AboutPage from '../pages/AboutPage'
+// import AboutPage from '../pages/AboutPage'
 import EducationPage from '../pages/EducationPage'
 import HomePage from '../pages/HomePage'
 import NotFoundPage from '../pages/NotFoundPage'
@@ -18,7 +18,7 @@ function AppRouter() {
           <Route element={<EducationPage />} path="/education" />
           <Route element={<ProtectionPlannerPage />} path="/protection-planner" />
           <Route element={<ProfilePage />} path="/profile" />
-          <Route element={<AboutPage />} path="/about" />
+          {/* <Route element={<AboutPage />} path="/about" /> */}
           <Route element={<NotFoundPage />} path="*" />
         </Route>
       </Routes>

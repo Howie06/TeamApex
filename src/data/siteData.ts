@@ -28,7 +28,7 @@ export const navItems: NavItem[] = [
   { label: 'Education', path: '/education' },
   { label: 'Protection Planner', path: '/protection-planner' },
   { label: 'Profile', path: '/profile' },
-  { label: 'About', path: '/about' },
+  // { label: 'About', path: '/about' },
 ]
 
 export const currentUv = {
