@@ -10,7 +10,7 @@ type PageIntroProps = {
 
 function PageIntro({ eyebrow, title, description, actions, aside }: PageIntroProps) {
   return (
-    <section className="page-hero">
+    <section className={`page-hero ${aside ? 'page-hero-split' : 'page-hero-single'}`.trim()}>
       <div className="page-hero-copy">
         <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>

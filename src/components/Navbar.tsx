@@ -6,7 +6,7 @@ function Navbar() {
     <header className="masthead">
       <div className="brand-block">
         <span className="brand-pill">SunSafe Victoria</span>
-        <span className="brand-caption">Team Apex front-end prototype</span>
+        <span className="brand-caption">Three-epic UV safety prototype</span>
       </div>
 
       <nav className="top-nav" aria-label="Primary navigation">

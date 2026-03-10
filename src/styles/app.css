@@ -181,8 +181,22 @@
 
 .page-hero {
   display: grid;
-  grid-template-columns: 1fr;
   gap: 16px;
+}
+
+.page-hero-single {
+  grid-template-columns: 1fr;
+}
+
+.page-hero-split {
+  grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+  align-items: stretch;
+}
+
+.page-hero-aside {
+  background:
+    radial-gradient(circle at top right, rgba(17, 127, 113, 0.1), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 250, 249, 0.88));
 }
 
 .page-hero-text,
@@ -817,6 +831,7 @@
 
 @media (max-width: 1120px) {
   .hero,
+  .page-hero-split,
   .section-grid,
   .gateway-grid,
   .feature-grid {

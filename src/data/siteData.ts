@@ -24,11 +24,8 @@ export type ToneProfile = {
 
 export const navItems: NavItem[] = [
   { label: 'Home', path: '/' },
-  { label: 'UV Index', path: '/uv-index' },
-  { label: 'Education', path: '/education' },
-  { label: 'Protection Planner', path: '/protection-planner' },
-  { label: 'Profile', path: '/profile' },
-  // { label: 'About', path: '/about' },
+  { label: 'Skin Guide', path: '/skin-guide' },
+  { label: 'Prevention', path: '/prevention' },
 ]
 
 export const currentUv = {
@@ -42,58 +39,49 @@ export const currentUv = {
 
 export const coreFeatures: FeatureItem[] = [
   {
-    id: 'us11',
-    story: 'US1.1',
-    title: 'Real-time localised UV alerts',
-    category: 'UV Index',
-    description: 'Live warning tied to the current location, exposure window, and next best action.',
-    benefit: 'Users recognise immediate danger and act before leaving shade.',
-    path: '/uv-index',
+    id: 'epic1',
+    story: 'EPIC 1',
+    title: 'Track local UV levels',
+    category: 'Track',
+    description:
+      'The homepage keeps live local UV information front and center so users can see risk immediately.',
+    benefit: 'US1.1 Must have: real-time localised UV alerts.',
+    path: '/',
   },
   {
-    id: 'us21',
-    story: 'US2.1',
-    title: 'UV impact and skin cancer visualisations',
-    category: 'Education',
-    description: 'Charts turn invisible UV risk into something easy to scan, compare, and explain.',
-    benefit: 'Complex health information becomes easier to understand and share.',
-    path: '/education',
+    id: 'epic2',
+    story: 'EPIC 2',
+    title: 'Understand skin impact',
+    category: 'Understand',
+    description:
+      'Visualisations and skin-tone guidance turn climate and health data into simple awareness.',
+    benefit: 'US2.1 Must have plus US2.2 Should have.',
+    path: '/skin-guide',
   },
   {
-    id: 'us22',
-    story: 'US2.2',
-    title: 'Skin-tone based guidance',
-    category: 'Profile',
-    description: 'Personal context shifts the advice from generic awareness to relevant caution.',
-    benefit: 'Sun-safety guidance feels more personal and credible.',
-    path: '/profile',
+    id: 'epic3',
+    story: 'EPIC 3',
+    title: 'Prevent overexposure',
+    category: 'Prevent',
+    description:
+      'Protection guidance translates awareness into clothing, dosage, and reminder actions.',
+    benefit: 'US3.3 Must have with US3.1 and US3.2 as supporting stories.',
+    path: '/prevention',
+  },
+]
+
+export const trackContextRows = [
+  {
+    label: 'Current risk level',
+    value: 'Very high conditions need immediate protection before longer outdoor travel.',
   },
   {
-    id: 'us31',
-    story: 'US3.1',
-    title: 'Sunscreen dosage guidance',
-    category: 'Protection Planner',
-    description: 'Body-zone dosage cards make correct sunscreen use easier to follow.',
-    benefit: 'Users apply protection with more confidence.',
-    path: '/protection-planner',
+    label: 'Local context',
+    value: 'Walking between classes and outdoor lunch periods are the main exposure moments today.',
   },
   {
-    id: 'us32',
-    story: 'US3.2',
-    title: 'Sunscreen reminders',
-    category: 'Protection Planner',
-    description: 'Reminder timeline keeps reapplication visible during long outdoor periods.',
-    benefit: 'Protection habits stay consistent throughout the day.',
-    path: '/protection-planner',
-  },
-  {
-    id: 'us33',
-    story: 'US3.3',
-    title: 'Clothing recommendations by UV index',
-    category: 'Protection Planner',
-    description: 'Outfit cards match UV severity to practical clothing and carry items.',
-    benefit: 'Awareness turns into daily protective behaviour.',
-    path: '/protection-planner',
+    label: 'Primary next action',
+    value: 'Apply SPF 50+, choose shade-first routes, and reduce time in direct midday sun.',
   },
 ]
 
@@ -169,16 +157,31 @@ export const insightCards = [
     detail: 'At UV 9, exposed skin can begin taking damage in well under half an hour.',
   },
   {
-    title: 'Tanning myth',
-    detail: 'A tan is not a shield against deeper UV-driven skin damage.',
+    title: 'Trend meaning',
+    detail: 'Longer-term rises in UV-driven harm make prevention messaging more urgent, not less.',
   },
   {
-    title: 'Peak exposure',
-    detail: 'Late morning through mid-afternoon remains the most important protection window.',
+    title: 'Skin-tone context',
+    detail: 'Different skin tones change visible burn timing, but they do not remove the need for protection.',
   },
   {
     title: 'Shareable takeaway',
-    detail: 'Simple visuals help students explain risk to friends and classmates.',
+    detail: 'Simple visuals help students explain UV risk to friends and classmates in plain language.',
+  },
+]
+
+export const skinInterpretationRows = [
+  {
+    label: 'US2.1 outcome',
+    value: 'Users can see how invisible UV exposure connects to long-term skin harm and cancer trends.',
+  },
+  {
+    label: 'US2.2 outcome',
+    value: 'Users can compare how skin-tone context changes urgency, timing, and advice emphasis.',
+  },
+  {
+    label: 'Design goal',
+    value: 'Complex health and climate information should feel readable within a few seconds.',
   },
 ]
 
@@ -234,17 +237,23 @@ export const reminderTimeline = [
   { time: '5:30 PM', label: 'Review', detail: 'Check if more sun exposure is still planned today.' },
 ]
 
+export const preventionChecklist = [
+  'SPF 50+ before the next outdoor walk',
+  'Hat and sunglasses packed',
+  'Long sleeves ready for peak UV',
+]
+
 export const aboutHighlights = [
   {
-    title: 'Why this product exists',
-    detail: 'Young adults often underestimate UV exposure even on familiar daily routines such as commuting, campus travel, and outdoor social time.',
+    title: 'Track on the homepage',
+    detail: 'The first page now leads with live UV danger because it is the fastest route to immediate action.',
   },
   {
-    title: 'Design direction',
-    detail: 'The interface stays bold, legible, and action-first so the user can move from awareness to prevention without friction.',
+    title: 'Understand on the skin page',
+    detail: 'Awareness content and skin-tone guidance now live together so the explanation feels coherent.',
   },
   {
-    title: 'Current build goal',
-    detail: 'This refactor turns the concept from one long presentation page into a routed front-end structure that can keep growing feature by feature.',
+    title: 'Prevent on one action page',
+    detail: 'Clothing, sunscreen dosage, and reminders now share one prevention-focused destination.',
   },
 ]

@@ -5,16 +5,13 @@ function Footer() {
     <footer className="footer">
       <div>
         <strong>SunSafe Victoria Prototype</strong>
-        <p>
-          A routed front-end concept for live UV awareness, education, and practical protection
-          planning.
-        </p>
+        <p>A three-page front-end concept built around Track, Understand, and Prevent.</p>
       </div>
 
       <div className="footer-links">
-        <Link to="/uv-index">Check UV</Link>
-        <Link to="/protection-planner">Plan protection</Link>
-        {/* <Link to="/about">About the project</Link> */}
+        <Link to="/">Track on home</Link>
+        <Link to="/skin-guide">Understand skin impact</Link>
+        <Link to="/prevention">Plan prevention</Link>
       </div>
     </footer>
   )
