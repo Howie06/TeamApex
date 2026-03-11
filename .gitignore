@@ -28,3 +28,5 @@ __pycache__/
 *.pyc
 .venv/
 backend/.venv/
+*.db
+backend/app.db

@@ -1,27 +1,26 @@
 # TeamApex
 
-This project now contains:
-
-- a React + TypeScript + Vite frontend in the project root
-- a minimal FastAPI backend in [backend](d:\5120prototype\UV\TeamApex\backend)
+TeamApex is a university onboarding iteration project about the generational shift in sun-safety attitudes. The repository contains a React frontend and a FastAPI backend for a web-based sun-safety experience focused on young adults in Victoria, Australia.
 
 ## Frontend
 
-Install frontend dependencies:
+The frontend is a Vite + React + TypeScript app in the project root.
 
 ```powershell
 npm install
-```
-
-Run the frontend dev server:
-
-```powershell
 npm run dev
 ```
 
 ## Backend
 
-Backend files live in [backend](d:\5120prototype\UV\TeamApex\backend).
+The backend lives in `backend/` and provides:
+
+- health checks
+- location search
+- seeded UV endpoints
+- awareness trend data
+- prevention guidance
+- reminder CRUD
 
 Quick start:
 
@@ -29,16 +28,15 @@ Quick start:
 python -m venv backend\.venv
 backend\.venv\Scripts\Activate.ps1
 python -m pip install -r backend\requirements.txt
+python backend\scripts\init_db.py
+python backend\scripts\seed_db.py --force
 python -m uvicorn app.main:app --reload --app-dir backend
 ```
 
-Useful backend URLs after startup:
+Useful URLs:
 
 - `http://127.0.0.1:8000/`
 - `http://127.0.0.1:8000/health`
 - `http://127.0.0.1:8000/docs`
-- `http://127.0.0.1:8000/api/uv/current`
 
-## Current limitation
-
-Python is not installed in the current environment, so the FastAPI server could not be started or verified here. The backend structure and instructions are in place.
+More backend details are documented in `backend/README.md`.

@@ -1,45 +1,72 @@
-from fastapi import FastAPI
+from __future__ import annotations
+
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from app.core.bootstrap import bootstrap_database
+from app.core.config import FRONTEND_ORIGINS
+from app.core.exceptions import AppError
+from app.routers import awareness, health, locations, prevention, reminders, uv
+from app.schemas.common import ErrorResponse, RootResponse
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    bootstrap_database()
+    yield
 
 
 app = FastAPI(
     title="TeamApex API",
-    version="0.1.0",
-    description="Minimal FastAPI backend for the TeamApex UV project.",
+    version="0.2.0",
+    description=(
+        "FastAPI backend for the TeamApex university onboarding iteration project "
+        "on the generational shift in sun-safety attitudes."
+    ),
+    lifespan=lifespan,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=FRONTEND_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-@app.get("/")
-def read_root():
-    return {
-        "name": "TeamApex API",
-        "status": "ok",
-        "docs": "/docs",
-    }
+@app.exception_handler(AppError)
+async def app_error_handler(_: Request, exc: AppError) -> JSONResponse:
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=ErrorResponse(detail=exc.detail).model_dump(),
+    )
 
 
-@app.get("/health")
-def health_check():
-    return {"status": "healthy"}
+@app.exception_handler(Exception)
+async def unexpected_error_handler(_: Request, exc: Exception) -> JSONResponse:
+    return JSONResponse(
+        status_code=500,
+        content=ErrorResponse(detail=f"Internal server error: {exc}").model_dump(),
+    )
 
 
-@app.get("/api/uv/current")
-def get_current_uv():
-    return {
-        "location": "Melbourne, VIC",
-        "uvIndex": 9,
-        "risk": "Very High",
-        "peakWindow": "11:00 AM - 3:00 PM",
-        "message": "Sample response from the FastAPI backend.",
-    }
+@app.get("/", response_model=RootResponse)
+def read_root() -> RootResponse:
+    return RootResponse(
+        name="TeamApex API",
+        status="ok",
+        docs="/docs",
+        version=app.version,
+    )
+
+
+app.include_router(health.router)
+app.include_router(locations.router)
+app.include_router(uv.router)
+app.include_router(awareness.router)
+app.include_router(prevention.router)
+app.include_router(reminders.router)
