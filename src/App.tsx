@@ -1,7 +1,12 @@
+import { SunSafetyProvider } from './context/SunSafetyContext'
 import AppRouter from './router/AppRouter'
 
 function App() {
-  return <AppRouter />
+  return (
+    <SunSafetyProvider>
+      <AppRouter />
+    </SunSafetyProvider>
+  )
 }
 
 export default App

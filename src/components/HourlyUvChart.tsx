@@ -1,13 +1,32 @@
-import { hourlyUv } from '../data/siteData'
+import type { UvHistoryPoint } from '../types/api'
 
-function HourlyUvChart() {
+type HourlyUvChartProps = {
+  series: UvHistoryPoint[]
+}
+
+function formatHourLabel(recordedAt: string) {
+  const parsedDate = new Date(recordedAt)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return recordedAt
+  }
+
+  return parsedDate.toLocaleTimeString('en-AU', {
+    hour: 'numeric',
+    minute: undefined,
+  })
+}
+
+function HourlyUvChart({ series }: HourlyUvChartProps) {
+  const safeSeries = series.length > 0 ? series : []
+
   return (
     <div className="bar-chart" aria-label="Hourly UV chart">
-      {hourlyUv.map((bar) => (
-        <div className="bar-column" key={bar.label}>
-          <div className="bar-fill" style={{ height: `${bar.value * 14}px` }} />
-          <strong>{bar.value}</strong>
-          <span>{bar.label}</span>
+      {safeSeries.map((bar) => (
+        <div className="bar-column" key={bar.recorded_at}>
+          <div className="bar-fill" style={{ height: `${Math.max(bar.uv_index, 1) * 14}px` }} />
+          <strong>{bar.uv_index.toFixed(1)}</strong>
+          <span>{formatHourLabel(bar.recorded_at)}</span>
         </div>
       ))}
     </div>

@@ -18,4 +18,9 @@ FRONTEND_ORIGINS = [
 
 DEFAULT_LOCATION_NAME = os.getenv("DEFAULT_LOCATION_NAME", "Melbourne")
 DEFAULT_DATA_SOURCE = "Seeded university onboarding dataset"
-UV_PROVIDER_MODE = os.getenv("UV_PROVIDER_MODE", "mock")
+UV_PROVIDER_MODE = os.getenv("UV_PROVIDER_MODE", "hybrid")
+OPEN_METEO_BASE_URL = os.getenv(
+    "OPEN_METEO_BASE_URL",
+    "https://api.open-meteo.com/v1/forecast",
+)
+UV_REQUEST_TIMEOUT_SECONDS = float(os.getenv("UV_REQUEST_TIMEOUT_SECONDS", "8"))

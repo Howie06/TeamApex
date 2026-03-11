@@ -3,14 +3,62 @@ import FeatureCard from '../components/FeatureCard'
 import HourlyUvChart from '../components/HourlyUvChart'
 import Panel from '../components/Panel'
 import UVHeroCard from '../components/UVHeroCard'
-import {
-  alertActions,
-  coreFeatures,
-  currentUv,
-  trackContextRows,
-} from '../data/siteData'
+import { useSunSafety } from '../context/useSunSafety'
+import { coreFeatures } from '../data/siteData'
+import { usePreventionData } from '../hooks/usePreventionData'
+
+function buildImmediateActions(riskLevel: string | undefined, sunscreenAdvice: string | undefined) {
+  return [
+    {
+      title: 'Before heading outside',
+      detail:
+        sunscreenAdvice ??
+        'Apply sunscreen, pack sunglasses, and protect exposed skin before longer outdoor travel.',
+    },
+    {
+      title: 'During the peak window',
+      detail:
+        riskLevel === 'Extreme' || riskLevel === 'Very High'
+          ? 'Keep outdoor time short and move between shaded or indoor zones wherever possible.'
+          : 'Use shaded routes and reduce open-sun exposure around midday.',
+    },
+    {
+      title: 'For longer afternoon activity',
+      detail:
+        riskLevel === 'High' || riskLevel === 'Very High' || riskLevel === 'Extreme'
+          ? 'Reapply sunscreen and switch into sleeves, hat, and sunglasses before extended outdoor activity.'
+          : 'Keep sunscreen nearby and review your protection plan before later outdoor sessions.',
+    },
+  ]
+}
 
 function HomePage() {
+  const { currentUv, error, uvHistory, uvLoading } = useSunSafety()
+  const { recommendation } = usePreventionData(currentUv?.uv_index ?? null)
+
+  const trackContextRows = [
+    {
+      label: 'Current risk level',
+      value:
+        currentUv?.warning_message ??
+        'Live UV conditions are loading so the alert can be translated into plain language.',
+    },
+    {
+      label: 'Estimated damage window',
+      value:
+        currentUv?.estimated_damage_window ??
+        'Waiting for a location-specific estimate of how quickly exposed skin may begin taking damage.',
+    },
+    {
+      label: 'Primary next action',
+      value:
+        recommendation?.general_advice ??
+        'Once live UV data is ready, this page will translate the number into a simple protection action.',
+    },
+  ]
+
+  const alertActions = buildImmediateActions(currentUv?.risk_level, recommendation?.sunscreen_advice)
+
   return (
     <div className="page-view">
       <section className="hero">
@@ -33,7 +81,7 @@ function HomePage() {
           </div>
         </div>
 
-        <UVHeroCard compact />
+        <UVHeroCard compact data={currentUv} loading={uvLoading} error={error} />
       </section>
 
       <section className="section-block">
@@ -72,9 +120,10 @@ function HomePage() {
           </div>
 
           <div className="summary-list">
-            <span>{currentUv.city}</span>
-            <span>UV {currentUv.value}</span>
-            <span>Peak {currentUv.peakWindow}</span>
+            <span>{currentUv?.location ?? 'Resolving location'}</span>
+            <span>UV {currentUv?.uv_index.toFixed(1) ?? '--'}</span>
+            <span>Peak {currentUv?.peak_window ?? 'Loading'}</span>
+            <span>{currentUv?.source ?? 'Waiting for source'}</span>
           </div>
         </Panel>
 
@@ -84,7 +133,11 @@ function HomePage() {
           badge="Track"
           badgeTone="muted"
         >
-          <HourlyUvChart />
+          {uvHistory.length > 0 ? (
+            <HourlyUvChart series={uvHistory} />
+          ) : (
+            <p className="state-note">Hourly UV history will appear once the live feed is ready.</p>
+          )}
         </Panel>
       </div>
 
@@ -115,7 +168,7 @@ function HomePage() {
           <div className="summary-list">
             <span>Skin page combines US2.1 and US2.2</span>
             <span>Prevention page combines US3.1 to US3.3</span>
-            <span>Current status: {currentUv.risk}</span>
+            <span>Current status: {currentUv?.risk_level ?? 'Loading'}</span>
           </div>
           <Link className="inline-link" to="/prevention">
             Continue to prevention planning

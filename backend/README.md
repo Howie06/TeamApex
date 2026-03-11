@@ -51,7 +51,9 @@ Optional variables:
 
 - `CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173`
 - `DEFAULT_LOCATION_NAME=Melbourne`
-- `UV_PROVIDER_MODE=mock`
+- `UV_PROVIDER_MODE=hybrid`
+- `OPEN_METEO_BASE_URL=https://api.open-meteo.com/v1/forecast`
+- `UV_REQUEST_TIMEOUT_SECONDS=8`
 
 ## Endpoints
 
@@ -77,6 +79,8 @@ Returns:
 - `risk_level`
 - `risk_color`
 - `warning_message`
+- `human_alert`
+- `estimated_damage_window`
 - `recorded_at`
 - `source`
 - `peak_window` for current UV
@@ -123,3 +127,4 @@ Example create payload:
 
 - CORS is enabled for Vite on port `5173`
 - The backend is suitable for a frontend to replace static seed data incrementally
+- In `hybrid` mode the backend tries Open-Meteo first and falls back to seeded SQLite UV data if the live request fails

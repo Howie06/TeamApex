@@ -9,6 +9,8 @@ class UVResponse(BaseModel):
     risk_level: str
     risk_color: str
     warning_message: str
+    human_alert: str
+    estimated_damage_window: str
     recorded_at: str
     source: str
     peak_window: str

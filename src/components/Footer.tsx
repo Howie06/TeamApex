@@ -4,8 +4,8 @@ function Footer() {
   return (
     <footer className="footer">
       <div>
-        <strong>SunSafe Victoria Prototype</strong>
-        <p>A three-page front-end concept built around Track, Understand, and Prevent.</p>
+        <strong>SunSafe Victoria</strong>
+        <p>A three-page sun-safety application built around Track, Understand, and Prevent.</p>
       </div>
 
       <div className="footer-links">

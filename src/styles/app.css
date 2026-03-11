@@ -53,6 +53,7 @@
 }
 
 .masthead,
+.location-toolbar,
 .page-main,
 .footer {
   position: relative;
@@ -74,6 +75,120 @@
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(18px);
   box-shadow: 0 16px 40px rgba(26, 52, 49, 0.08);
+}
+
+.location-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+  gap: 18px;
+  margin-top: 18px;
+  padding: 22px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at top left, rgba(239, 173, 57, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 251, 249, 0.82));
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
+}
+
+.location-toolbar-copy h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  letter-spacing: -0.05em;
+}
+
+.location-toolbar-text {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.location-toolbar-controls,
+.reminder-form,
+.reminder-list,
+.reminder-manager {
+  display: grid;
+  gap: 12px;
+}
+
+.location-toolbar-topline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.toolbar-button {
+  min-height: 42px;
+}
+
+.location-search-field {
+  display: grid;
+  gap: 8px;
+}
+
+.location-search-field span {
+  color: var(--brand-deep);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.location-search-field input,
+.form-field input,
+.reminder-item-controls input,
+.reminder-item-controls select {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--text);
+  font: inherit;
+}
+
+.location-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.location-result-button {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid rgba(21, 51, 48, 0.07);
+  border-radius: 18px;
+  background: rgba(17, 127, 113, 0.04);
+  color: var(--text);
+  text-align: left;
+}
+
+.location-result-button span,
+.location-result-empty,
+.state-note {
+  color: var(--muted);
+}
+
+.location-result-button-active {
+  border-color: rgba(17, 127, 113, 0.2);
+  background: rgba(17, 127, 113, 0.1);
+}
+
+.location-result-empty,
+.state-note {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(21, 51, 48, 0.05);
+}
+
+.state-note-error {
+  color: #b14b42;
+  background: rgba(234, 106, 93, 0.12);
 }
 
 .brand-block {
@@ -399,7 +514,13 @@
   border-radius: 50%;
   background:
     radial-gradient(circle at center, rgba(255, 255, 255, 0.18) 0 46%, transparent 47%),
-    conic-gradient(#64deaf 0 18%, #f3d243 18% 38%, #ffb344 38% 61%, #ff8544 61% 83%, #ea645f 83% 100%);
+    conic-gradient(
+      #64deaf 0 18%,
+      #f3d243 18% 38%,
+      #ffb344 38% 61%,
+      #ff8544 61% 83%,
+      var(--risk-accent, #ea645f) 83% 100%
+    );
   box-shadow: inset 0 0 0 12px rgba(255, 255, 255, 0.05);
 }
 
@@ -588,7 +709,7 @@
 
 .bar-chart {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
   align-items: end;
   gap: 12px;
   min-height: 240px;
@@ -744,6 +865,7 @@
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.8);
   color: var(--text);
+  font: inherit;
 }
 
 .summary-list {
@@ -775,6 +897,41 @@
 .tone-button-active {
   outline: 4px solid rgba(17, 127, 113, 0.18);
   outline-offset: 3px;
+}
+
+.myth-line {
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+.reminder-submit {
+  width: 100%;
+}
+
+.reminder-item-card {
+  align-items: flex-start;
+}
+
+.reminder-item-body {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.reminder-item-controls {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.delete-button {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(234, 106, 93, 0.18);
+  border-radius: 14px;
+  background: rgba(234, 106, 93, 0.08);
+  color: #b14b42;
+  font-weight: 800;
 }
 
 .tone-copy {
@@ -830,6 +987,7 @@
 }
 
 @media (max-width: 1120px) {
+  .location-toolbar,
   .hero,
   .page-hero-split,
   .section-grid,
@@ -839,6 +997,8 @@
   }
 
   .planner-form-grid,
+  .location-results,
+  .reminder-item-controls,
   .insight-grid,
   .outfit-grid,
   .dosage-grid,
@@ -864,6 +1024,10 @@
     flex-direction: column;
     align-items: stretch;
     border-radius: 24px;
+  }
+
+  .location-toolbar {
+    padding: 20px;
   }
 
   .brand-block,

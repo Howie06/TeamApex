@@ -33,6 +33,13 @@ python backend\scripts\seed_db.py --force
 python -m uvicorn app.main:app --reload --app-dir backend
 ```
 
+Frontend can point at the backend with:
+
+```powershell
+$env:VITE_API_BASE_URL="http://127.0.0.1:8000"
+npm run dev
+```
+
 Useful URLs:
 
 - `http://127.0.0.1:8000/`

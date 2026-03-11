@@ -1,7 +1,7 @@
-import type { ToneProfile } from '../data/siteData'
+import type { SkinToneOption } from '../data/siteData'
 
 type SkinToneGuideProps = {
-  profiles: ToneProfile[]
+  profiles: SkinToneOption[]
   selectedToneId: string
   onSelect: (toneId: string) => void
 }

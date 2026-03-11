@@ -1,28 +1,45 @@
-import { currentUv } from '../data/siteData'
+import type { CSSProperties } from 'react'
+import type { UvCurrentResponse } from '../types/api'
 
 type UVHeroCardProps = {
   compact?: boolean
+  data: UvCurrentResponse | null
+  loading?: boolean
+  error?: string | null
 }
 
-function UVHeroCard({ compact = false }: UVHeroCardProps) {
+function UVHeroCard({ compact = false, data, loading = false, error = null }: UVHeroCardProps) {
+  const ringStyle = {
+    '--risk-accent': data?.risk_color ?? '#64deaf',
+  } as CSSProperties
+
+  const locationText = data?.location ?? 'Resolving location'
+  const peakWindow = data?.peak_window ?? 'Waiting for live UV data'
+  const statusText = loading ? 'Refreshing live UV' : data?.recorded_at ?? 'Waiting for update'
+  const riskLabel = data?.risk_level ?? 'Loading'
+  const heroTitle = data ? `Current UV risk near ${data.location}` : 'Current UV risk near you'
+  const heroCopy = error
+    ? error
+    : data?.human_alert ?? 'We are checking today’s UV conditions and preparing local advice.'
+
   return (
-    <section className={`hero-live-card ${compact ? 'hero-live-card-compact' : ''}`.trim()}>
+    <section
+      className={`hero-live-card ${compact ? 'hero-live-card-compact' : ''}`.trim()}
+      style={ringStyle}
+    >
       <div className="card-topline">
         <span className="section-kicker">Live UV alert</span>
-        <span className="card-chip danger">{currentUv.risk}</span>
+        <span className="card-chip danger">{riskLabel}</span>
       </div>
 
       <div className="live-card-body">
         <div>
           <div className="uv-reading">
-            <strong>{currentUv.value}</strong>
-            <span>/ {currentUv.max}</span>
+            <strong>{data?.uv_index.toFixed(1) ?? '--'}</strong>
+            <span>/ 11+</span>
           </div>
-          <h2>Current UV risk near you</h2>
-          <p>
-            Skin damage may begin quickly. Shade, sunscreen, and protective clothing should be
-            treated as immediate actions.
-          </p>
+          <h2>{heroTitle}</h2>
+          <p>{heroCopy}</p>
         </div>
 
         <div className="uv-ring" aria-hidden="true">
@@ -33,15 +50,15 @@ function UVHeroCard({ compact = false }: UVHeroCardProps) {
       <div className="hero-metrics">
         <div>
           <span className="metric-label">Location</span>
-          <strong>{currentUv.city}</strong>
+          <strong>{locationText}</strong>
         </div>
         <div>
           <span className="metric-label">Peak window</span>
-          <strong>{currentUv.peakWindow}</strong>
+          <strong>{peakWindow}</strong>
         </div>
         <div>
           <span className="metric-label">Status</span>
-          <strong>{currentUv.updatedAt}</strong>
+          <strong>{statusText}</strong>
         </div>
       </div>
     </section>

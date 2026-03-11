@@ -4,18 +4,32 @@ import PageIntro from '../components/PageIntro'
 import Panel from '../components/Panel'
 import SkinToneGuide from '../components/SkinToneGuide'
 import TrendChart from '../components/TrendChart'
-import {
-  currentUv,
-  insightCards,
-  skinInterpretationRows,
-  toneProfiles,
-} from '../data/siteData'
+import { useSunSafety } from '../context/useSunSafety'
+import { skinInterpretationRows, skinToneOptions } from '../data/siteData'
+import { useAwarenessData } from '../hooks/useAwarenessData'
+import { useSkinGuidance } from '../hooks/useSkinGuidance'
 
-const initialTone = toneProfiles[1] ?? toneProfiles[0]
+const SKIN_TONE_STORAGE_KEY = 'teamapex.selected-skin-tone'
+const initialTone = skinToneOptions[1] ?? skinToneOptions[0]
 
 function SkinPage() {
-  const [selectedToneId, setSelectedToneId] = useState<string>(initialTone.id)
-  const selectedTone = toneProfiles.find((tone) => tone.id === selectedToneId) ?? initialTone
+  const [selectedToneId, setSelectedToneId] = useState<string>(() => {
+    const savedToneId = window.localStorage.getItem(SKIN_TONE_STORAGE_KEY)
+    return savedToneId ?? initialTone.id
+  })
+  const { currentUv } = useSunSafety()
+  const { loading, error, myths, skinCancerTrend, uvTrend } = useAwarenessData()
+  const selectedTone = skinToneOptions.find((tone) => tone.id === selectedToneId) ?? initialTone
+  const {
+    data: skinGuidance,
+    error: guidanceError,
+    loading: guidanceLoading,
+  } = useSkinGuidance(currentUv?.uv_index ?? null, selectedTone.skinType)
+
+  function handleToneSelect(toneId: string) {
+    setSelectedToneId(toneId)
+    window.localStorage.setItem(SKIN_TONE_STORAGE_KEY, toneId)
+  }
 
   return (
     <div className="page-view">
@@ -46,30 +60,66 @@ function SkinPage() {
             <div className="summary-list">
               <span>Must have: US2.1</span>
               <span>Should have: US2.2</span>
-              <span>Current UV {currentUv.value}</span>
+              <span>Current UV {currentUv?.uv_index.toFixed(1) ?? '--'}</span>
+              <span>{currentUv?.location ?? 'Resolving location'}</span>
             </div>
           </div>
         }
       />
 
       <div className="section-grid">
-        <Panel
-          title="US2.1 UV impact and skin cancer trends"
-          description="Simple visualisation keeps long-term harm visible and easier to explain."
-          badge="Must have"
-          badgeTone="danger"
-        >
-          <TrendChart />
+        <div className="stack">
+          <Panel
+            title="US2.1 Skin cancer impact trend"
+            description="This chart turns long-term UV harm into a simple visual story for awareness."
+            badge="Must have"
+            badgeTone="danger"
+          >
+            {loading ? (
+              <p className="state-note">Loading skin cancer trend...</p>
+            ) : error ? (
+              <p className="state-note state-note-error">{error}</p>
+            ) : skinCancerTrend ? (
+              <TrendChart
+                ariaLabel="Skin cancer trend chart"
+                series={skinCancerTrend.series.map((point) => ({
+                  label: point.label,
+                  value: point.value,
+                }))}
+              />
+            ) : null}
+          </Panel>
 
-          <div className="info-list">
-            {skinInterpretationRows.map((row) => (
-              <div className="info-row" key={row.label}>
-                <span>{row.label}</span>
-                <strong>{row.value}</strong>
-              </div>
-            ))}
-          </div>
-        </Panel>
+          <Panel
+            title="US2.1 Australia UV and heat trend"
+            description="The second chart explains why repeated high-UV days make prevention feel urgent."
+            badge="Must have"
+            badgeTone="muted"
+          >
+            {loading ? (
+              <p className="state-note">Loading Australia UV trend...</p>
+            ) : error ? (
+              <p className="state-note state-note-error">{error}</p>
+            ) : uvTrend ? (
+              <TrendChart
+                ariaLabel="Australia UV exposure trend chart"
+                series={uvTrend.series.map((point) => ({
+                  label: point.label,
+                  value: point.value,
+                }))}
+              />
+            ) : null}
+
+            <div className="info-list">
+              {skinInterpretationRows.map((row) => (
+                <div className="info-row" key={row.label}>
+                  <span>{row.label}</span>
+                  <strong>{row.value}</strong>
+                </div>
+              ))}
+            </div>
+          </Panel>
+        </div>
 
         <Panel
           title="US2.2 Skin-tone based guidance"
@@ -78,9 +128,9 @@ function SkinPage() {
           badgeTone="soft"
         >
           <SkinToneGuide
-            profiles={toneProfiles}
+            profiles={skinToneOptions}
             selectedToneId={selectedToneId}
-            onSelect={setSelectedToneId}
+            onSelect={handleToneSelect}
           />
 
           <div className="tone-detail dosage-summary-two">
@@ -90,34 +140,48 @@ function SkinPage() {
             </div>
             <div>
               <span className="metric-label">Estimated burn window</span>
-              <strong>{selectedTone.burnWindow}</strong>
+              <strong>{skinGuidance?.burn_window ?? 'Loading'}</strong>
             </div>
           </div>
 
-          <p className="tone-copy">{selectedTone.guidance}</p>
+          <p className="tone-copy">
+            {guidanceLoading
+              ? 'Loading personalised skin guidance for the current UV conditions.'
+              : skinGuidance?.guidance ?? guidanceError ?? 'Skin guidance is not available yet.'}
+          </p>
 
           <div className="callout-box">
-            <strong>Current emphasis at UV {currentUv.value}</strong>
-            <p>{selectedTone.emphasis}</p>
+            <strong>Current emphasis at UV {currentUv?.uv_index.toFixed(1) ?? '--'}</strong>
+            <p>
+              {skinGuidance?.emphasis ??
+                'The selected tone will surface a protection emphasis once the live UV reading is ready.'}
+            </p>
           </div>
         </Panel>
       </div>
 
       <div className="section-grid">
         <Panel
-          title="Simple visual insights for awareness"
-          description="These cards turn complex health messaging into something users can scan quickly."
+          title="Myths and facts for awareness sharing"
+          description="These myth cards help young adults explain UV risk to friends in plain language."
           badge="Understand"
           badgeTone="muted"
         >
-          <div className="insight-grid">
-            {insightCards.map((card) => (
-              <div className="insight-card" key={card.title}>
-                <strong>{card.title}</strong>
-                <p>{card.detail}</p>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <p className="state-note">Loading myth and fact cards...</p>
+          ) : error ? (
+            <p className="state-note state-note-error">{error}</p>
+          ) : myths ? (
+            <div className="insight-grid">
+              {myths.items.map((item) => (
+                <div className="insight-card" key={item.id}>
+                  <strong>{item.title}</strong>
+                  <p className="myth-line">Myth: {item.myth}</p>
+                  <p>Fact: {item.fact}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </Panel>
 
         <Panel
@@ -134,7 +198,7 @@ function SkinPage() {
             </div>
             <div className="info-row">
               <span>After tone selection</span>
-              <strong>Users see how urgency changes by skin context.</strong>
+              <strong>Users see how urgency changes by skin context and current UV.</strong>
             </div>
             <div className="info-row">
               <span>Next action</span>

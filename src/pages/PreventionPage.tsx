@@ -1,19 +1,16 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageIntro from '../components/PageIntro'
 import Panel from '../components/Panel'
 import PlannerForm from '../components/PlannerForm'
-import ReminderTimeline from '../components/ReminderTimeline'
-import {
-  currentUv,
-  dosageCards,
-  outfitCards,
-  preventionChecklist,
-  reminderTimeline,
-} from '../data/siteData'
+import ReminderManager from '../components/ReminderManager'
+import { useSunSafety } from '../context/useSunSafety'
+import { usePreventionData } from '../hooks/usePreventionData'
+import { useReminders } from '../hooks/useReminders'
 
 function PreventionPage() {
-  const [remindersEnabled, setRemindersEnabled] = useState(true)
+  const { currentUv } = useSunSafety()
+  const { dosage, error, loading, recommendation } = usePreventionData(currentUv?.uv_index ?? null)
+  const reminders = useReminders()
 
   return (
     <div className="page-view">
@@ -45,6 +42,7 @@ function PreventionPage() {
               <span>Must have: US3.3</span>
               <span>Should have: US3.1</span>
               <span>Should have: US3.2</span>
+              <span>UV {currentUv?.uv_index.toFixed(1) ?? '--'}</span>
             </div>
           </div>
         }
@@ -55,10 +53,10 @@ function PreventionPage() {
           <Panel
             title="Plan today's outdoor protection"
             description="A lightweight planner keeps prevention actionable under the current UV conditions."
-            badge={`UV ${currentUv.value}`}
+            badge={`UV ${currentUv?.uv_index.toFixed(1) ?? '--'}`}
             badgeTone="danger"
           >
-            <PlannerForm uvValue={currentUv.value} />
+            <PlannerForm uvValue={currentUv?.uv_index ?? 0} />
           </Panel>
 
           <Panel
@@ -67,15 +65,42 @@ function PreventionPage() {
             badge="Must have"
             badgeTone="danger"
           >
-            <div className="outfit-grid">
-              {outfitCards.map((item) => (
-                <div className="outfit-card" key={item.title}>
-                  <span className="outfit-badge">{item.label}</span>
-                  <strong>{item.title}</strong>
-                  <p>{item.detail}</p>
+            {loading ? (
+              <p className="state-note">Loading clothing recommendations...</p>
+            ) : error ? (
+              <p className="state-note state-note-error">{error}</p>
+            ) : recommendation ? (
+              <>
+                <div className="outfit-grid">
+                  <div className="outfit-card">
+                    <span className="outfit-badge">Wear</span>
+                    <strong>Protective clothing</strong>
+                    <p>{recommendation.clothing_advice}</p>
+                  </div>
+                  <div className="outfit-card">
+                    <span className="outfit-badge">Apply</span>
+                    <strong>Sunscreen strategy</strong>
+                    <p>{recommendation.sunscreen_advice}</p>
+                  </div>
+                  <div className="outfit-card">
+                    <span className="outfit-badge">Plan</span>
+                    <strong>General protection</strong>
+                    <p>{recommendation.general_advice}</p>
+                  </div>
+                  <div className="outfit-card">
+                    <span className="outfit-badge">Risk</span>
+                    <strong>{recommendation.risk_level} UV response</strong>
+                    <p>{currentUv?.human_alert ?? 'Live UV guidance will appear here.'}</p>
+                  </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="summary-list">
+                  {recommendation.checklist.map((item) => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </div>
+              </>
+            ) : null}
           </Panel>
         </div>
 
@@ -86,26 +111,36 @@ function PreventionPage() {
             badge="Should have"
             badgeTone="soft"
           >
-            <div className="dosage-summary dosage-summary-two">
-              <div>
-                <span className="metric-label">Suggested total</span>
-                <strong>4.5 - 5.5 tsp</strong>
-              </div>
-              <div>
-                <span className="metric-label">Best use today</span>
-                <strong>Prioritise all exposed areas</strong>
-              </div>
-            </div>
-
-            <div className="dosage-grid">
-              {dosageCards.map((dose) => (
-                <div className="dosage-card" key={dose.area}>
-                  <strong>{dose.area}</strong>
-                  <span>{dose.amount}</span>
-                  <p>{dose.note}</p>
+            {loading ? (
+              <p className="state-note">Loading dosage guidance...</p>
+            ) : error ? (
+              <p className="state-note state-note-error">{error}</p>
+            ) : dosage ? (
+              <>
+                <div className="dosage-summary dosage-summary-two">
+                  <div>
+                    <span className="metric-label">Risk level</span>
+                    <strong>{dosage.risk_level}</strong>
+                  </div>
+                  <div>
+                    <span className="metric-label">Body zones</span>
+                    <strong>{dosage.dosage_guide.length} coverage areas</strong>
+                  </div>
                 </div>
-              ))}
-            </div>
+
+                <p className="tone-copy">{dosage.dosage_advice}</p>
+
+                <div className="dosage-grid">
+                  {dosage.dosage_guide.map((dose) => (
+                    <div className="dosage-card" key={dose.area}>
+                      <strong>{dose.area}</strong>
+                      <span>{dose.amount}</span>
+                      <p>{dose.note}</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : null}
           </Panel>
 
           <Panel
@@ -114,10 +149,14 @@ function PreventionPage() {
             badge="Should have"
             badgeTone="soft"
           >
-            <ReminderTimeline
-              items={reminderTimeline}
-              enabled={remindersEnabled}
-              onToggle={() => setRemindersEnabled((enabled) => !enabled)}
+            <ReminderManager
+              reminders={reminders.reminders}
+              loading={reminders.loading}
+              saving={reminders.saving}
+              error={reminders.error}
+              onCreate={reminders.addReminder}
+              onUpdate={reminders.editReminder}
+              onDelete={reminders.removeReminder}
             />
           </Panel>
 
@@ -129,10 +168,17 @@ function PreventionPage() {
             className="panel-cta"
           >
             <div className="summary-list">
-              {preventionChecklist.map((item) => (
-                <span key={item}>{item}</span>
-              ))}
-              <span>{remindersEnabled ? 'Reminder set for 3:15 PM' : 'Reminders currently paused'}</span>
+              {(recommendation?.checklist ?? ['Protection checklist will update once live UV data loads.']).map(
+                (item) => (
+                  <span key={item}>{item}</span>
+                ),
+              )}
+              <span>
+                {reminders.reminders.length > 0
+                  ? `${reminders.reminders.filter((item) => item.status === 'active').length} active reminders`
+                  : 'No reminder saved yet'}
+              </span>
+              <span>{currentUv?.source ?? 'Waiting for UV data source'}</span>
             </div>
           </Panel>
         </div>
