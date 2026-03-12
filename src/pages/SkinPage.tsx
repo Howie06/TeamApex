@@ -47,24 +47,6 @@ function SkinPage() {
             </Link>
           </>
         }
-        aside={
-          <div className="stack">
-            <div className="callout-box">
-              <strong>User stories on this page</strong>
-              <p>
-                US2.1 covers UV impact and skin cancer visualisations. US2.2 adds skin-tone based
-                guidance for more personal awareness.
-              </p>
-            </div>
-
-            <div className="summary-list">
-              <span>Must have: US2.1</span>
-              <span>Should have: US2.2</span>
-              <span>Current UV {currentUv?.uv_index.toFixed(1) ?? '--'}</span>
-              <span>{currentUv?.location ?? 'Resolving location'}</span>
-            </div>
-          </div>
-        }
       />
 
       <div className="section-grid">

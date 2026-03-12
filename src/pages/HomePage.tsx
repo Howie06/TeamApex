@@ -1,10 +1,8 @@
 import { Link } from 'react-router-dom'
-import FeatureCard from '../components/FeatureCard'
 import HourlyUvChart from '../components/HourlyUvChart'
 import Panel from '../components/Panel'
 import UVHeroCard from '../components/UVHeroCard'
 import { useSunSafety } from '../context/useSunSafety'
-import { coreFeatures } from '../data/siteData'
 import { usePreventionData } from '../hooks/usePreventionData'
 
 function buildImmediateActions(riskLevel: string | undefined, sunscreenAdvice: string | undefined) {
@@ -84,25 +82,6 @@ function HomePage() {
         <UVHeroCard compact data={currentUv} loading={uvLoading} error={error} />
       </section>
 
-      <section className="section-block">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Three-page structure</p>
-            <h2>Our application now addresses UV risk in three connected pages.</h2>
-            <p>
-              Track makes danger visible, Understand explains skin impact, and Prevent turns that
-              awareness into protection behaviour.
-            </p>
-          </div>
-        </div>
-
-        <div className="feature-grid">
-          {coreFeatures.map((feature) => (
-            <FeatureCard key={feature.id} {...feature} ctaLabel="Open epic" />
-          ))}
-        </div>
-      </section>
-
       <div className="section-grid">
         <Panel
           title="US1.1 Real-time localised UV alerts"
@@ -120,8 +99,6 @@ function HomePage() {
           </div>
 
           <div className="summary-list">
-            <span>{currentUv?.location ?? 'Resolving location'}</span>
-            <span>UV {currentUv?.uv_index.toFixed(1) ?? '--'}</span>
             <span>Peak {currentUv?.peak_window ?? 'Loading'}</span>
             <span>{currentUv?.source ?? 'Waiting for source'}</span>
           </div>
@@ -159,16 +136,15 @@ function HomePage() {
         </Panel>
 
         <Panel
-          title="How the flow continues"
-          description="After tracking the live danger, users should move into awareness and prevention without leaving the design system."
-          badge="Next pages"
+          title="Next step after the alert"
+          description="Once the user sees today's risk, the product should move directly into prevention planning."
+          badge="Continue"
           badgeTone="soft"
           className="panel-cta"
         >
           <div className="summary-list">
-            <span>Skin page combines US2.1 and US2.2</span>
-            <span>Prevention page combines US3.1 to US3.3</span>
             <span>Current status: {currentUv?.risk_level ?? 'Loading'}</span>
+            <span>Use the prevention page for clothing, sunscreen, and reminders.</span>
           </div>
           <Link className="inline-link" to="/prevention">
             Continue to prevention planning

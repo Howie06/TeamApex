@@ -28,24 +28,6 @@ function PreventionPage() {
             </Link>
           </>
         }
-        aside={
-          <div className="stack">
-            <div className="callout-box">
-              <strong>User stories on this page</strong>
-              <p>
-                US3.1 explains sunscreen dosage, US3.2 handles reminders, and US3.3 gives
-                clothing recommendations based on the UV index.
-              </p>
-            </div>
-
-            <div className="summary-list">
-              <span>Must have: US3.3</span>
-              <span>Should have: US3.1</span>
-              <span>Should have: US3.2</span>
-              <span>UV {currentUv?.uv_index.toFixed(1) ?? '--'}</span>
-            </div>
-          </div>
-        }
       />
 
       <div className="section-grid">
@@ -158,28 +140,6 @@ function PreventionPage() {
               onUpdate={reminders.editReminder}
               onDelete={reminders.removeReminder}
             />
-          </Panel>
-
-          <Panel
-            title="Daily prevention summary"
-            description="This section closes the loop from live warning to protection behaviour."
-            badge="Checklist"
-            badgeTone="muted"
-            className="panel-cta"
-          >
-            <div className="summary-list">
-              {(recommendation?.checklist ?? ['Protection checklist will update once live UV data loads.']).map(
-                (item) => (
-                  <span key={item}>{item}</span>
-                ),
-              )}
-              <span>
-                {reminders.reminders.length > 0
-                  ? `${reminders.reminders.filter((item) => item.status === 'active').length} active reminders`
-                  : 'No reminder saved yet'}
-              </span>
-              <span>{currentUv?.source ?? 'Waiting for UV data source'}</span>
-            </div>
           </Panel>
         </div>
       </div>
