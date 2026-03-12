@@ -84,7 +84,7 @@ function HomePage() {
 
       <div className="section-grid">
         <Panel
-          title="US1.1 Real-time localised UV alerts"
+          title="Real-time localised UV alerts"
           description="This must-have user story stays on the homepage as the first decision point in the product."
           badge="Must have"
           badgeTone="danger"
@@ -133,22 +133,6 @@ function HomePage() {
               </div>
             ))}
           </div>
-        </Panel>
-
-        <Panel
-          title="Next step after the alert"
-          description="Once the user sees today's risk, the product should move directly into prevention planning."
-          badge="Continue"
-          badgeTone="soft"
-          className="panel-cta"
-        >
-          <div className="summary-list">
-            <span>Current status: {currentUv?.risk_level ?? 'Loading'}</span>
-            <span>Use the prevention page for clothing, sunscreen, and reminders.</span>
-          </div>
-          <Link className="inline-link" to="/prevention">
-            Continue to prevention planning
-          </Link>
         </Panel>
       </div>
     </div>

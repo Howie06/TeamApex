@@ -52,7 +52,7 @@ function SkinPage() {
       <div className="section-grid">
         <div className="stack">
           <Panel
-            title="US2.1 Skin cancer impact trend"
+            title="Skin cancer impact trend"
             description="This chart turns long-term UV harm into a simple visual story for awareness."
             badge="Must have"
             badgeTone="danger"
@@ -73,7 +73,7 @@ function SkinPage() {
           </Panel>
 
           <Panel
-            title="US2.1 Australia UV and heat trend"
+            title="Australia UV and heat trend"
             description="The second chart explains why repeated high-UV days make prevention feel urgent."
             badge="Must have"
             badgeTone="muted"
@@ -104,7 +104,7 @@ function SkinPage() {
         </div>
 
         <Panel
-          title="US2.2 Skin-tone based guidance"
+          title="Skin-tone based guidance"
           description="Tone selection personalises urgency without changing the core need for protection."
           badge="Should have"
           badgeTone="soft"
@@ -164,33 +164,6 @@ function SkinPage() {
               ))}
             </div>
           ) : null}
-        </Panel>
-
-        <Panel
-          title="What this page should lead to next"
-          description="Awareness matters only if the user can carry it into protection planning."
-          badge="Flow"
-          badgeTone="soft"
-          className="panel-cta"
-        >
-          <div className="info-list">
-            <div className="info-row">
-              <span>After the chart</span>
-              <strong>Users understand why today's UV exposure matters.</strong>
-            </div>
-            <div className="info-row">
-              <span>After tone selection</span>
-              <strong>Users see how urgency changes by skin context and current UV.</strong>
-            </div>
-            <div className="info-row">
-              <span>Next action</span>
-              <strong>Move into clothing, sunscreen, and reminder planning.</strong>
-            </div>
-          </div>
-
-          <Link className="inline-link" to="/prevention">
-            Open prevention page
-          </Link>
         </Panel>
       </div>
     </div>

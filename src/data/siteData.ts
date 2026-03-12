@@ -45,11 +45,11 @@ export const skinToneOptions: SkinToneOption[] = [
 
 export const skinInterpretationRows = [
   {
-    label: 'US2.1 outcome',
+    label: 'Awareness outcome',
     value: 'Users can see how invisible UV exposure connects to long-term skin harm and cancer trends.',
   },
   {
-    label: 'US2.2 outcome',
+    label: 'Tone guidance outcome',
     value: 'Users can compare how skin-tone context changes urgency, timing, and advice emphasis.',
   },
   {

@@ -42,7 +42,7 @@ function PreventionPage() {
           </Panel>
 
           <Panel
-            title="US3.3 Clothing recommendations based on UV index"
+            title="Clothing recommendations based on UV index"
             description="This must-have story connects the UV number to practical carry items and clothing choices."
             badge="Must have"
             badgeTone="danger"
@@ -88,7 +88,7 @@ function PreventionPage() {
 
         <div className="stack">
           <Panel
-            title="US3.1 Sunscreen dosage guidance"
+            title="Sunscreen dosage guidance"
             description="Body-zone dosage cards keep the advice legible instead of forcing users to estimate."
             badge="Should have"
             badgeTone="soft"
@@ -126,7 +126,7 @@ function PreventionPage() {
           </Panel>
 
           <Panel
-            title="US3.2 Sunscreen reminders"
+            title="Sunscreen reminders"
             description="Reminder behaviour supports long exposure days without overcrowding the core protection advice."
             badge="Should have"
             badgeTone="soft"
