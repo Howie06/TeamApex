@@ -52,7 +52,7 @@ function LocationToolbar() {
             type="search"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Search Melbourne, Geelong, Bendigo..."
+            placeholder="Search Carnegie, Clayton, Melbourne CBD..."
           />
         </label>
 

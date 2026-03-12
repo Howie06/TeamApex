@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import re
 from sqlite3 import Row
 
 from app.core.database import get_connection
@@ -47,22 +48,55 @@ def list_locations() -> list[LocationResponse]:
     return [_to_response(_row_to_location(row)) for row in rows]
 
 
+def _build_search_patterns(query: str) -> list[str]:
+    normalized_query = query.strip().lower()
+    tokens = [
+        token
+        for token in re.split(r"[\s,./\\()-]+", normalized_query)
+        if len(token) >= 3
+    ]
+
+    patterns: list[str] = []
+    seen: set[str] = set()
+
+    for candidate in [normalized_query, *tokens]:
+        if candidate and candidate not in seen:
+            seen.add(candidate)
+            patterns.append(f"%{candidate}%")
+
+    return patterns
+
+
 def search_locations(query: str | None) -> list[LocationResponse]:
     if not query:
         return list_locations()
 
-    like_query = f"%{query.strip().lower()}%"
+    like_patterns = _build_search_patterns(query)
+    if not like_patterns:
+        return list_locations()
+
+    conditions: list[str] = []
+    parameters: list[str] = []
+
+    for pattern in like_patterns:
+        conditions.extend(
+            [
+                "lower(name) LIKE ?",
+                "lower(state) LIKE ?",
+                "lower(search_terms) LIKE ?",
+            ]
+        )
+        parameters.extend([pattern, pattern, pattern])
+
     with get_connection() as connection:
         rows = connection.execute(
-            """
-            SELECT *
+            f"""
+            SELECT DISTINCT *
             FROM locations
-            WHERE lower(name) LIKE ?
-               OR lower(state) LIKE ?
-               OR lower(search_terms) LIKE ?
+            WHERE {' OR '.join(conditions)}
             ORDER BY name ASC
             """,
-            (like_query, like_query, like_query),
+            parameters,
         ).fetchall()
 
     return [_to_response(_row_to_location(row)) for row in rows]
