@@ -1,8 +1,10 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 
 type PlannerFormProps = {
   uvValue: number
 }
+
+const NO_CURRENT_UV_THRESHOLD = 0.2
 
 const activityAdvice = {
   commute: 'Pack sunglasses and keep a quick reapply option in your bag.',
@@ -27,16 +29,39 @@ function PlannerForm({ uvValue }: PlannerFormProps) {
   const [activity, setActivity] = useState<keyof typeof activityAdvice>('commute')
   const [duration, setDuration] = useState<keyof typeof durationAdvice>('medium')
   const [exposure, setExposure] = useState<keyof typeof exposureAdvice>('mixed')
+  const isNoCurrentUv = uvValue <= NO_CURRENT_UV_THRESHOLD
 
-  const reminderText =
-    duration === 'long' || activity === 'sport' || activity === 'beach'
+  const reminderText = isNoCurrentUv
+    ? 'No sunscreen reminder is needed right now.'
+    : duration === 'long' || activity === 'sport' || activity === 'beach'
       ? 'Set a 2-hour reapply reminder.'
       : 'Set one reminder before the peak window ends.'
 
-  const dosageText =
-    exposure === 'full' || activity === 'beach'
+  const dosageText = isNoCurrentUv
+    ? 'No sunscreen dose is needed under the current UV 0 conditions.'
+    : exposure === 'full' || activity === 'beach'
       ? 'Aim for full exposed-area coverage before leaving.'
       : 'Focus on face, neck, arms, and any other uncovered skin.'
+
+  const planLead = isNoCurrentUv
+    ? 'Current UV is negligible, so you do not need active sunscreen planning right now.'
+    : activityAdvice[activity]
+
+  const planTiming = isNoCurrentUv
+    ? 'Use this planner to think ahead for the next daytime outing instead of the current conditions.'
+    : durationAdvice[duration]
+
+  const planExposure = isNoCurrentUv
+    ? 'If you go out later in daylight, check the UV again before leaving and then adjust clothing and sunscreen.'
+    : exposureAdvice[exposure]
+
+  const summaryItems = isNoCurrentUv
+    ? [
+        reminderText,
+        dosageText,
+        'Check the UV again before the next daytime outing.',
+      ]
+    : [reminderText, dosageText, 'Hat and sunglasses stay high priority.']
 
   return (
     <div className="planner-form-shell">
@@ -81,13 +106,13 @@ function PlannerForm({ uvValue }: PlannerFormProps) {
 
       <div className="planner-plan">
         <strong>Suggested plan for UV {uvValue}</strong>
-        <p>{activityAdvice[activity]}</p>
-        <p>{durationAdvice[duration]}</p>
-        <p>{exposureAdvice[exposure]}</p>
+        <p>{planLead}</p>
+        <p>{planTiming}</p>
+        <p>{planExposure}</p>
         <div className="summary-list">
-          <span>{reminderText}</span>
-          <span>{dosageText}</span>
-          <span>Hat and sunglasses stay high priority.</span>
+          {summaryItems.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
         </div>
       </div>
     </div>

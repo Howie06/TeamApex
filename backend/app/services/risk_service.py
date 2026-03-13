@@ -1,6 +1,8 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
+
+NO_CURRENT_UV_THRESHOLD = 0.2
 
 
 @dataclass(frozen=True, slots=True)
@@ -13,7 +15,7 @@ class UVRiskProfile:
 
 
 def _estimate_damage_minutes(uv_index: float) -> int:
-    if uv_index <= 0:
+    if uv_index <= NO_CURRENT_UV_THRESHOLD:
         return 120
 
     return max(8, min(120, round(96 / uv_index)))
@@ -44,6 +46,19 @@ def _build_human_alert(uv_index: float, location_name: str, action: str) -> str:
 
 
 def map_uv_risk(uv_index: float, location_name: str) -> UVRiskProfile:
+    if uv_index <= NO_CURRENT_UV_THRESHOLD:
+        return UVRiskProfile(
+            level="No current",
+            color="#5B8DEF",
+            warning_message=(
+                f"UV is currently negligible in {location_name}. Active sun protection is not needed right now."
+            ),
+            human_alert=(
+                f"Current UV is 0 in {location_name}. No immediate sun-protection action is needed unless you are planning ahead for the next daytime outing."
+            ),
+            estimated_damage_window="No immediate UV damage risk",
+        )
+
     estimated_damage_window = _format_damage_window(uv_index)
 
     if uv_index <= 2:

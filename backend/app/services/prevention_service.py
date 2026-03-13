@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 
@@ -11,6 +11,8 @@ from app.schemas.prevention import (
     SunscreenDosageResponse,
 )
 from app.services.risk_service import map_uv_risk
+
+NO_CURRENT_UV_THRESHOLD = 0.2
 
 
 def _get_rule_for_uv(uv_index: float):
@@ -33,6 +35,19 @@ def _get_rule_for_uv(uv_index: float):
 
 
 def get_recommendations(uv_index: float) -> PreventionRecommendationResponse:
+    if uv_index <= NO_CURRENT_UV_THRESHOLD:
+        return PreventionRecommendationResponse(
+            uv_index=uv_index,
+            risk_level="No current",
+            clothing_advice="No special sun-protective clothing is needed right now under UV 0 conditions.",
+            sunscreen_advice="Sunscreen is not needed for the current conditions.",
+            general_advice="If you expect to go outside during daylight later, check the UV again closer to that time.",
+            checklist=[
+                "No immediate UV protection action is needed",
+                "Check UV again before the next daytime outing",
+            ],
+        )
+
     rule = _get_rule_for_uv(uv_index)
     risk = map_uv_risk(uv_index, "Victoria")
 
@@ -47,6 +62,20 @@ def get_recommendations(uv_index: float) -> PreventionRecommendationResponse:
 
 
 def get_sunscreen_dosage(uv_index: float) -> SunscreenDosageResponse:
+    if uv_index <= NO_CURRENT_UV_THRESHOLD:
+        return SunscreenDosageResponse(
+            uv_index=uv_index,
+            risk_level="No current",
+            dosage_advice="No sunscreen dose is needed right now under UV 0 conditions.",
+            dosage_guide=[
+                DosageGuideItem(
+                    area="Current conditions",
+                    amount="No dose needed",
+                    note="Check again before the next daytime outdoor session.",
+                )
+            ],
+        )
+
     rule = _get_rule_for_uv(uv_index)
     risk = map_uv_risk(uv_index, "Victoria")
 
@@ -62,6 +91,15 @@ def get_sunscreen_dosage(uv_index: float) -> SunscreenDosageResponse:
 
 def get_skin_guidance(uv_index: float, skin_type: str) -> SkinGuidanceResponse:
     normalized_skin_type = skin_type.strip().lower()
+
+    if uv_index <= NO_CURRENT_UV_THRESHOLD:
+        return SkinGuidanceResponse(
+            uv_index=uv_index,
+            skin_type=normalized_skin_type,
+            burn_window="No immediate burn risk",
+            guidance="UV is effectively zero right now, so active sun protection is not needed until daytime UV rises again.",
+            emphasis="Use this time to plan ahead for the next daytime outing rather than reapplying sunscreen now.",
+        )
 
     with get_connection() as connection:
         row = connection.execute(
