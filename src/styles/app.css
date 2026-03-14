@@ -361,6 +361,51 @@
   align-items: center;
 }
 
+.hero-query-form {
+  margin-top: 18px;
+}
+
+.hero-query-grid {
+  align-items: end;
+}
+
+.hero-query-action {
+  display: grid;
+}
+
+.form-field input {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--text);
+}
+
+.hero-query-button {
+  min-height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(9, 37, 37, 0.86);
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.hero-query-button:hover {
+  background: rgba(9, 37, 37, 0.94);
+}
+
+.hero-query-feedback {
+  margin-top: 12px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.84);
+}
+
 .uv-reading {
   display: flex;
   align-items: baseline;
@@ -410,9 +455,9 @@
   height: 84px;
   border-radius: 50%;
   background: rgba(9, 37, 37, 0.86);
-  font-size: 1.2rem;
+  font-size: 0.92rem;
   font-weight: 800;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.12em;
 }
 
 .hero-metrics,
@@ -839,6 +884,7 @@
   }
 
   .planner-form-grid,
+  .hero-query-grid,
   .insight-grid,
   .outfit-grid,
   .dosage-grid,
@@ -900,5 +946,9 @@
   .uv-ring {
     width: 132px;
     height: 132px;
+  }
+
+  .hero-query-action {
+    width: 100%;
   }
 }
