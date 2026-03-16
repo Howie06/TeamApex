@@ -12,6 +12,8 @@ services:
         value: Melbourne
       - key: UV_PROVIDER_MODE
         value: hybrid
+      - key: UV_REQUEST_TIMEOUT_SECONDS
+        value: 15
       - key: CORS_ORIGINS
         value: http://localhost:5173,http://127.0.0.1:5173,https://stately-florentine-f56527.netlify.app
       - key: CORS_ORIGIN_REGEX

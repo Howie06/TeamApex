@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import json
+import logging
+from time import sleep
 from typing import Protocol
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 from app.core.config import OPEN_METEO_BASE_URL, UV_PROVIDER_MODE, UV_REQUEST_TIMEOUT_SECONDS
 from app.core.database import get_connection
 from app.core.exceptions import NotFoundError, ServiceUnavailableError
 from app.models.entities import LocationModel, UVReadingModel
+
+logger = logging.getLogger(__name__)
 
 
 class UVProvider(Protocol):
@@ -94,6 +98,10 @@ class MockUVProvider:
 
 class OpenMeteoUVProvider:
     source_name = "Open-Meteo Weather API"
+    request_headers = {
+        "Accept": "application/json",
+        "User-Agent": "TeamApexSunSafety/1.0",
+    }
 
     def _resolve_coordinates(
         self,
@@ -127,17 +135,31 @@ class OpenMeteoUVProvider:
                 "timezone": "auto",
             }
         )
+        request_url = f"{OPEN_METEO_BASE_URL}?{query}"
+        last_error: Exception | None = None
 
-        try:
-            with urlopen(
-                f"{OPEN_METEO_BASE_URL}?{query}",
-                timeout=UV_REQUEST_TIMEOUT_SECONDS,
-            ) as response:
-                return json.loads(response.read().decode("utf-8"))
-        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
-            raise ServiceUnavailableError(
-                f"Real UV provider request failed: {exc}"
-            ) from exc
+        for attempt in range(2):
+            try:
+                request = Request(request_url, headers=self.request_headers)
+                with urlopen(
+                    request,
+                    timeout=UV_REQUEST_TIMEOUT_SECONDS,
+                ) as response:
+                    return json.loads(response.read().decode("utf-8"))
+            except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+                last_error = exc
+                logger.warning(
+                    "Open-Meteo request failed for %s on attempt %s: %s",
+                    location.name,
+                    attempt + 1,
+                    exc,
+                )
+                if attempt == 0:
+                    sleep(0.5)
+
+        raise ServiceUnavailableError(
+            f"Real UV provider request failed: {last_error}"
+        ) from last_error
 
     def get_latest_reading(
         self,
@@ -204,7 +226,12 @@ class HybridUVProvider:
     ) -> UVReadingModel:
         try:
             return self.live_provider.get_latest_reading(location, latitude, longitude)
-        except ServiceUnavailableError:
+        except ServiceUnavailableError as exc:
+            logger.warning(
+                "Falling back to seeded UV reading for %s because live provider failed: %s",
+                location.name,
+                exc.detail,
+            )
             return self.fallback_provider.get_latest_reading(location, latitude, longitude)
 
     def get_history(
@@ -215,7 +242,12 @@ class HybridUVProvider:
     ) -> list[UVReadingModel]:
         try:
             return self.live_provider.get_history(location, latitude, longitude)
-        except ServiceUnavailableError:
+        except ServiceUnavailableError as exc:
+            logger.warning(
+                "Falling back to seeded UV history for %s because live provider failed: %s",
+                location.name,
+                exc.detail,
+            )
             return self.fallback_provider.get_history(location, latitude, longitude)
 
 
