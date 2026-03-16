@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
 from app.core.database import get_connection
 from app.core.config import DEFAULT_LOCATION_NAME, UV_PROVIDER_MODE, UV_REQUEST_TIMEOUT_SECONDS
 from app.core.exceptions import AppError
@@ -14,6 +17,90 @@ from app.schemas.uv import (
 )
 from app.services.location_service import get_location_by_coordinates, get_location_by_name
 from app.services.risk_service import map_uv_risk
+
+LIVE_UV_SOURCE = OpenMeteoUVProvider.source_name
+UV_TIMEZONE = ZoneInfo("Australia/Melbourne")
+CURRENT_CACHE_WINDOW_MINUTES = 15
+HISTORY_CACHE_WINDOW_MINUTES = 60
+STALE_LIVE_WINDOW_MINUTES = 240
+
+
+def _row_to_reading(row) -> UVReadingModel:
+    return UVReadingModel(
+        id=row["id"],
+        location_id=row["location_id"],
+        uv_index=row["uv_index"],
+        recorded_at=row["recorded_at"],
+        source=row["source"],
+    )
+
+
+def _parse_recorded_at(recorded_at: str) -> datetime | None:
+    try:
+        parsed = datetime.fromisoformat(recorded_at)
+    except ValueError:
+        return None
+
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=UV_TIMEZONE)
+
+    return parsed.astimezone(UV_TIMEZONE)
+
+
+def _is_recent(recorded_at: str, max_age_minutes: int) -> bool:
+    parsed = _parse_recorded_at(recorded_at)
+    if parsed is None:
+        return False
+    return parsed >= datetime.now(UV_TIMEZONE) - timedelta(minutes=max_age_minutes)
+
+
+def _get_latest_cached_live_reading(
+    location: LocationModel,
+    max_age_minutes: int,
+) -> UVReadingModel | None:
+    with get_connection() as connection:
+        row = connection.execute(
+            """
+            SELECT *
+            FROM uv_readings
+            WHERE location_id = ? AND source = ?
+            ORDER BY recorded_at DESC
+            LIMIT 1
+            """,
+            (location.id, LIVE_UV_SOURCE),
+        ).fetchone()
+
+    if row is None:
+        return None
+
+    reading = _row_to_reading(row)
+    if not _is_recent(reading.recorded_at, max_age_minutes):
+        return None
+    return reading
+
+
+def _get_cached_live_history(
+    location: LocationModel,
+    max_age_minutes: int,
+) -> list[UVReadingModel]:
+    with get_connection() as connection:
+        rows = connection.execute(
+            """
+            SELECT *
+            FROM uv_readings
+            WHERE location_id = ? AND source = ?
+            ORDER BY recorded_at ASC
+            """,
+            (location.id, LIVE_UV_SOURCE),
+        ).fetchall()
+
+    if not rows:
+        return []
+
+    history = [_row_to_reading(row) for row in rows]
+    if not _is_recent(history[-1].recorded_at, max_age_minutes):
+        return []
+    return history
 
 
 def _store_current_reading(location: LocationModel, reading: UVReadingModel) -> None:
@@ -95,33 +182,72 @@ def _build_response(location: LocationModel, reading: UVReadingModel) -> UVRespo
 
 def get_current_uv(location_name: str | None = None) -> UVResponse:
     location = get_location_by_name(location_name or DEFAULT_LOCATION_NAME)
+    cached_live_reading = _get_latest_cached_live_reading(location, CURRENT_CACHE_WINDOW_MINUTES)
+    if cached_live_reading is not None:
+        return _build_response(location, cached_live_reading)
+
     provider = get_uv_provider()
     reading = provider.get_latest_reading(location)
+    if reading.source == LIVE_UV_SOURCE:
+        _store_current_reading(location, reading)
+        return _build_response(location, reading)
+
+    cached_stale_live_reading = _get_latest_cached_live_reading(location, STALE_LIVE_WINDOW_MINUTES)
+    if cached_stale_live_reading is not None:
+        return _build_response(location, cached_stale_live_reading)
+
     _store_current_reading(location, reading)
     return _build_response(location, reading)
 
 
 def get_uv_by_coordinates(latitude: float, longitude: float) -> UVResponse:
     location = get_location_by_coordinates(latitude, longitude)
+    cached_live_reading = _get_latest_cached_live_reading(location, CURRENT_CACHE_WINDOW_MINUTES)
+    if cached_live_reading is not None:
+        return _build_response(location, cached_live_reading)
+
     provider = get_uv_provider()
     reading = provider.get_latest_reading(location, latitude, longitude)
+    if reading.source == LIVE_UV_SOURCE:
+        _store_current_reading(location, reading)
+        return _build_response(location, reading)
+
+    cached_stale_live_reading = _get_latest_cached_live_reading(location, STALE_LIVE_WINDOW_MINUTES)
+    if cached_stale_live_reading is not None:
+        return _build_response(location, cached_stale_live_reading)
+
     _store_current_reading(location, reading)
     return _build_response(location, reading)
 
 
 def get_uv_history(location_name: str | None = None) -> UVHistoryResponse:
     location = get_location_by_name(location_name or DEFAULT_LOCATION_NAME)
+    cached_history = _get_cached_live_history(location, HISTORY_CACHE_WINDOW_MINUTES)
+    if cached_history:
+        return UVHistoryResponse(
+            location=f"{location.name}, {location.state}",
+            series=[
+                UVHistoryPoint(recorded_at=reading.recorded_at, uv_index=reading.uv_index)
+                for reading in cached_history
+            ],
+            source=cached_history[-1].source,
+        )
+
     provider = get_uv_provider()
     history = provider.get_history(location)
-    _store_history(location, history)
+    if history and history[-1].source == LIVE_UV_SOURCE:
+        _store_history(location, history)
+        selected_history = history
+    else:
+        selected_history = _get_cached_live_history(location, STALE_LIVE_WINDOW_MINUTES) or history
 
     return UVHistoryResponse(
         location=f"{location.name}, {location.state}",
         series=[
             UVHistoryPoint(recorded_at=reading.recorded_at, uv_index=reading.uv_index)
-            for reading in history
+            for reading in selected_history
         ],
-        source=history[-1].source,
+        source=selected_history[-1].source,
     )
 
 
