@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.bootstrap import bootstrap_database
-from app.core.config import FRONTEND_ORIGINS
+from app.core.config import FRONTEND_ORIGIN_REGEX, FRONTEND_ORIGINS
 from app.core.exceptions import AppError
 from app.routers import awareness, health, locations, prevention, reminders, uv
 from app.schemas.common import ErrorResponse, RootResponse
@@ -32,6 +32,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=FRONTEND_ORIGINS,
+    allow_origin_regex=FRONTEND_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -14,7 +14,7 @@ import type {
 
 const hostedFallbackApiBaseUrl =
   typeof window !== 'undefined' && window.location.hostname.endsWith('.netlify.app')
-    ? 'https://evil-walls-wish.loca.lt'
+    ? 'https://teamapex-api.onrender.com'
     : 'http://127.0.0.1:8000'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? hostedFallbackApiBaseUrl).replace(

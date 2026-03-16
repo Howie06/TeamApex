@@ -15,6 +15,7 @@ FRONTEND_ORIGINS = [
     ).split(",")
     if origin.strip()
 ]
+FRONTEND_ORIGIN_REGEX = os.getenv("CORS_ORIGIN_REGEX", r"https://.*\.netlify\.app") or None
 
 DEFAULT_LOCATION_NAME = os.getenv("DEFAULT_LOCATION_NAME", "Melbourne")
 DEFAULT_DATA_SOURCE = "Seeded university onboarding dataset"
