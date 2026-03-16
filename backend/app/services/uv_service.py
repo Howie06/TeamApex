@@ -1,10 +1,17 @@
 from __future__ import annotations
 
 from app.core.database import get_connection
-from app.core.config import DEFAULT_LOCATION_NAME
+from app.core.config import DEFAULT_LOCATION_NAME, UV_PROVIDER_MODE, UV_REQUEST_TIMEOUT_SECONDS
+from app.core.exceptions import AppError
 from app.models.entities import LocationModel, UVReadingModel
-from app.providers.uv_provider import get_uv_provider
-from app.schemas.uv import UVHistoryPoint, UVHistoryResponse, UVResponse
+from app.providers.uv_provider import MockUVProvider, OpenMeteoUVProvider, get_uv_provider
+from app.schemas.uv import (
+    UVHistoryPoint,
+    UVHistoryResponse,
+    UVProviderDebugResponse,
+    UVProviderReadingDebug,
+    UVResponse,
+)
 from app.services.location_service import get_location_by_coordinates, get_location_by_name
 from app.services.risk_service import map_uv_risk
 
@@ -115,4 +122,48 @@ def get_uv_history(location_name: str | None = None) -> UVHistoryResponse:
             for reading in history
         ],
         source=history[-1].source,
+    )
+
+
+def get_uv_provider_debug(location_name: str | None = None) -> UVProviderDebugResponse:
+    location = get_location_by_name(location_name or DEFAULT_LOCATION_NAME)
+    display_name = f"{location.name}, {location.state}"
+    live_provider = OpenMeteoUVProvider()
+    fallback_provider = MockUVProvider()
+
+    fallback_reading = fallback_provider.get_latest_reading(location)
+    live_reading: UVReadingModel | None = None
+    live_error_type: str | None = None
+    live_error_detail: str | None = None
+
+    try:
+        live_reading = live_provider.get_latest_reading(location)
+    except AppError as exc:
+        live_error_type = exc.__class__.__name__
+        live_error_detail = exc.detail
+    except Exception as exc:
+        live_error_type = exc.__class__.__name__
+        live_error_detail = str(exc)
+
+    return UVProviderDebugResponse(
+        location=display_name,
+        provider_mode=UV_PROVIDER_MODE,
+        timeout_seconds=UV_REQUEST_TIMEOUT_SECONDS,
+        live_success=live_reading is not None,
+        live_reading=(
+            UVProviderReadingDebug(
+                uv_index=live_reading.uv_index,
+                recorded_at=live_reading.recorded_at,
+                source=live_reading.source,
+            )
+            if live_reading is not None
+            else None
+        ),
+        live_error_type=live_error_type,
+        live_error_detail=live_error_detail,
+        fallback_reading=UVProviderReadingDebug(
+            uv_index=fallback_reading.uv_index,
+            recorded_at=fallback_reading.recorded_at,
+            source=fallback_reading.source,
+        ),
     )

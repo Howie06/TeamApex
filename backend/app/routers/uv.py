@@ -2,8 +2,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Query
 
-from app.schemas.uv import UVHistoryResponse, UVResponse
-from app.services.uv_service import get_current_uv, get_uv_by_coordinates, get_uv_history
+from app.schemas.uv import UVHistoryResponse, UVProviderDebugResponse, UVResponse
+from app.services.uv_service import (
+    get_current_uv,
+    get_uv_by_coordinates,
+    get_uv_history,
+    get_uv_provider_debug,
+)
 
 
 router = APIRouter(prefix="/api/uv", tags=["uv"])
@@ -29,3 +34,10 @@ def uv_history(
     location: str | None = Query(default=None, description="Location name such as Melbourne or Melbourne, VIC."),
 ) -> UVHistoryResponse:
     return get_uv_history(location)
+
+
+@router.get("/provider-debug", response_model=UVProviderDebugResponse)
+def uv_provider_debug(
+    location: str | None = Query(default=None, description="Location name such as Melbourne or Melbourne, VIC."),
+) -> UVProviderDebugResponse:
+    return get_uv_provider_debug(location)

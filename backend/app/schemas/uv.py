@@ -25,3 +25,20 @@ class UVHistoryResponse(BaseModel):
     location: str
     series: list[UVHistoryPoint]
     source: str
+
+
+class UVProviderReadingDebug(BaseModel):
+    uv_index: float
+    recorded_at: str
+    source: str
+
+
+class UVProviderDebugResponse(BaseModel):
+    location: str
+    provider_mode: str
+    timeout_seconds: float
+    live_success: bool
+    live_reading: UVProviderReadingDebug | None = None
+    live_error_type: str | None = None
+    live_error_detail: str | None = None
+    fallback_reading: UVProviderReadingDebug | None = None
