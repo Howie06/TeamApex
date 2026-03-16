@@ -15,9 +15,9 @@ services:
       - key: UV_REQUEST_TIMEOUT_SECONDS
         value: 15
       - key: CORS_ORIGINS
-        value: http://localhost:5173,http://127.0.0.1:5173,https://stately-florentine-f56527.netlify.app
+        value: http://localhost:5173,http://127.0.0.1:5173,https://stately-florentine-f56527.netlify.app,https://teamapex-web.onrender.com
       - key: CORS_ORIGIN_REGEX
-        value: https://.*\\.(netlify\\.app|onrender\\.com)
+        value: https://.*\.(netlify\.app|onrender\.com)
   - type: web
     name: teamapex-web
     runtime: static
