@@ -13,7 +13,9 @@ import type {
 } from '../types/api'
 
 const hostedFallbackApiBaseUrl =
-  typeof window !== 'undefined' && window.location.hostname.endsWith('.netlify.app')
+  typeof window !== 'undefined' &&
+  (window.location.hostname.endsWith('.netlify.app') ||
+    window.location.hostname.endsWith('.onrender.com'))
     ? 'https://teamapex-api.onrender.com'
     : 'http://127.0.0.1:8000'
 
