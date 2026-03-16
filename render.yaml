@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: teamapex-api
+    runtime: docker
+    plan: free
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: DEFAULT_LOCATION_NAME
+        value: Melbourne
+      - key: UV_PROVIDER_MODE
+        value: hybrid
+      - key: CORS_ORIGINS
+        value: http://localhost:5173,http://127.0.0.1:5173,https://stately-florentine-f56527.netlify.app
